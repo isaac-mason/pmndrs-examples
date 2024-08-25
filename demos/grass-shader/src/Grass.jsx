@@ -21,17 +21,26 @@ export default function Grass({ options = { bW: 0.12, bH: 1, joints: 5 }, width 
     geo.attributes.position.needsUpdate = true
     geo.lookAt(new THREE.Vector3(0, 1, 0))
     const positions = geo.attributes.position.array
-    for (let i = 0; i < positions.length; i+=3) {
-      positions[i+1] = getYPosition(positions[i], positions[i+2])
+    for (let i = 0; i < positions.length; i += 3) {
+      positions[i + 1] = getYPosition(positions[i], positions[i + 2])
     }
     geo.computeVertexNormals()
     return geo
   }, [width])
-  useFrame(state => (materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4))
+  const boundingSphere = useMemo(() => {
+    return new THREE.Sphere(new THREE.Vector3(), (Math.sqrt(2) * width) / 2)
+  }, [width])
+
+  useFrame((state) => (materialRef.current.uniforms.time.value = state.clock.elapsedTime / 4))
+
   return (
     <group {...props}>
       <mesh>
-        <instancedBufferGeometry index={baseGeom.index} attributes-position={baseGeom.attributes.position} attributes-uv={baseGeom.attributes.uv}>
+        <instancedBufferGeometry
+          index={baseGeom.index}
+          attributes-position={baseGeom.attributes.position}
+          attributes-uv={baseGeom.attributes.uv}
+          boundingSphere={boundingSphere}>
           <instancedBufferAttribute attach="attributes-offset" args={[new Float32Array(attributeData.offsets), 3]} />
           <instancedBufferAttribute attach="attributes-orientation" args={[new Float32Array(attributeData.orientations), 4]} />
           <instancedBufferAttribute attach="attributes-stretch" args={[new Float32Array(attributeData.stretches), 1]} />
